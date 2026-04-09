@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hacker News — Two Column</title>
+<style>
+/* === Reset === */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* === HN base styles (pixel-perfect from news.css) === */
+body {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  color: #828282;
+  background: #f6f6ef;
+}
+a:link    { color: #000000; text-decoration: none; }
+a:visited { color: #828282; text-decoration: none; }
+
+/* === Header === */
+#header {
+  background: #ff6600;
+  padding: 2px;
+}
+#header-inner {
+  display: flex;
+  align-items: center;
+  padding: 2px 28px;
+  gap: 4px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+#header .logo {
+  border: 1px solid white;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#header .logo a {
+  color: white;
+  font-weight: bold;
+  font-size: 11pt;
+  line-height: 1;
+}
+#header .pagetop {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  color: #222222;
+  line-height: 12px;
+}
+#header .pagetop a:link,
+#header .pagetop a:visited {
+  color: #000000;
+}
+#header .pagetop b a {
+  font-size: 10pt;
+}
+#header .hnname {
+  margin-left: 1px;
+  margin-right: 5px;
+}
+
+/* === Two-column layout === */
+#columns {
+  display: flex;
+  max-width: 1600px;
+  margin: 0 auto;
+  gap: 0;
+}
+.column {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 24px 20px 24px;
+}
+.column:first-child {
+  border-right: 1px solid #e0e0e0;
+}
+.column-header {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 8pt;
+  color: #828282;
+  padding: 0 10px 8px 10px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* === Story table (matches HN table structure) === */
+.storytable {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+.storytable td {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  color: #828282;
+}
+.storytable .athing td {
+  padding-top: 5px;
+}
+
+/* Rank */
+td.rank {
+  text-align: right;
+  vertical-align: top;
+  font-size: 10pt;
+  color: #828282;
+  width: 30px;
+  padding-right: 5px;
+  padding-top: 2px;
+}
+
+/* Vote arrow */
+td.votelinks {
+  vertical-align: top;
+  width: 14px;
+  padding-top: 1px;
+}
+.votearrow {
+  width: 10px;
+  height: 10px;
+  border: 0;
+  margin: 3px 2px 6px;
+  cursor: pointer;
+  display: inline-block;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='5,0 10,10 0,10' fill='%23828282'/%3E%3C/svg%3E") no-repeat;
+  background-size: 10px;
+}
+.votearrow:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpolygon points='5,0 10,10 0,10' fill='%23ff6600'/%3E%3C/svg%3E");
+}
+
+/* Title */
+td.storytitle {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 10pt;
+  vertical-align: top;
+  padding-top: 1px;
+  line-height: 14pt;
+}
+td.storytitle a:link { color: #000000; }
+td.storytitle a:visited { color: #828282; }
+.sitebit a { color: #828282; font-size: 8pt; }
+.sitebit a:link { color: #828282; }
+.sitestr { color: #828282; font-size: 8pt; }
+
+/* Subtext */
+td.subtext {
+  font-family: Verdana, Geneva, sans-serif;
+  font-size: 7pt;
+  color: #828282;
+  padding-bottom: 5px;
+}
+td.subtext a:link,
+td.subtext a:visited { color: #828282; }
+td.subtext a:hover { text-decoration: underline; }
+
+/* === Loading state === */
+.loading {
+  text-align: center;
+  padding: 40px 20px;
+  color: #828282;
+  font-size: 10pt;
+}
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e0e0e0;
+  border-top-color: #ff6600;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Error state */
+.error {
+  text-align: center;
+  padding: 40px 20px;
+  color: #c00;
+  font-size: 10pt;
+}
+
+/* === Responsive: stack on mobile === */
+@media only screen and (max-width: 900px) {
+  #columns {
+    flex-direction: column;
+  }
+  .column:first-child {
+    border-right: none;
+    border-bottom: 1px solid #e0e0e0;
+  }
+}
+@media only screen and (max-width: 750px) {
+  td.storytitle { font-size: 11pt; line-height: 14pt; }
+  td.subtext { font-size: 9pt; }
+  .votearrow { transform: scale(1.3); margin-right: 6px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div id="header">
+  <div id="header-inner">
+    <div class="logo"><a href="https://news.ycombinator.com">Y</a></div>
+    <span class="pagetop">
+      <b class="hnname"><a href="https://news.ycombinator.com">Hacker News</a></b>
+      <a href="https://news.ycombinator.com/newest">new</a> |
+      <a href="https://news.ycombinator.com/front">past</a> |
+      <a href="https://news.ycombinator.com/newcomments">comments</a> |
+      <a href="https://news.ycombinator.com/ask">ask</a> |
+      <a href="https://news.ycombinator.com/show">show</a> |
+      <a href="https://news.ycombinator.com/jobs">jobs</a> |
+      <a href="https://news.ycombinator.com/submit">submit</a>
+    </span>
+  </div>
+</div>
+
+<!-- Two columns -->
+<div id="columns">
+  <div class="column" id="col-top">
+    <div class="column-header">Top Stories</div>
+    <div id="top-stories" class="loading">
+      <span class="loading-spinner"></span> Loading top stories...
+    </div>
+  </div>
+  <div class="column" id="col-new">
+    <div class="column-header">New Stories</div>
+    <div id="new-stories" class="loading">
+      <span class="loading-spinner"></span> Loading new stories...
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://hacker-news.firebaseio.com/v0';
+const STORY_COUNT = 30;
+
+function timeAgo(unixTime) {
+  const seconds = Math.floor(Date.now() / 1000) - unixTime;
+  if (seconds < 60) return seconds + ' seconds ago';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return minutes === 1 ? '1 minute ago' : minutes + ' minutes ago';
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return hours === 1 ? '1 hour ago' : hours + ' hours ago';
+  const days = Math.floor(hours / 24);
+  return days === 1 ? '1 day ago' : days + ' days ago';
+}
+
+function extractDomain(url) {
+  if (!url) return null;
+  try {
+    const hostname = new URL(url).hostname;
+    return hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+function renderStory(item, rank) {
+  const domain = extractDomain(item.url);
+  const titleUrl = item.url || `https://news.ycombinator.com/item?id=${item.id}`;
+  const commentsUrl = `https://news.ycombinator.com/item?id=${item.id}`;
+  const userUrl = `https://news.ycombinator.com/user?id=${item.by}`;
+  const commentCount = item.descendants || 0;
+  const commentText = commentCount === 0 ? 'discuss' : commentCount === 1 ? '1\u00a0comment' : commentCount + '\u00a0comments';
+
+  return `
+    <tr class="athing" id="item-${item.id}">
+      <td class="rank">${rank}.</td>
+      <td class="votelinks"><div class="votearrow" title="upvote"></div></td>
+      <td class="storytitle">
+        <a href="${titleUrl}" target="_blank" rel="noopener">${escapeHtml(item.title)}</a>${domain ? ` <span class="sitebit">(<a href="https://${domain}" target="_blank" rel="noopener"><span class="sitestr">${domain}</span></a>)</span>` : ''}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2"></td>
+      <td class="subtext">
+        ${item.score} point${item.score !== 1 ? 's' : ''} by
+        <a href="${userUrl}" target="_blank" rel="noopener">${escapeHtml(item.by)}</a>
+        ${timeAgo(item.time)} |
+        <a href="${commentsUrl}" target="_blank" rel="noopener">${commentText}</a>
+      </td>
+    </tr>`;
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderStories(container, items) {
+  const rows = items.map((item, i) => renderStory(item, i + 1)).join('');
+  container.className = '';
+  container.innerHTML = `<table class="storytable"><colgroup><col style="width:30px"><col style="width:14px"><col></colgroup>${rows}</table>`;
+}
+
+function renderError(container, message) {
+  container.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+}
+
+async function fetchItem(id) {
+  const res = await fetch(`${API}/item/${id}.json`);
+  if (!res.ok) throw new Error(`Failed to fetch item ${id}`);
+  return res.json();
+}
+
+async function fetchStories(endpoint, container) {
+  try {
+    const res = await fetch(`${API}/${endpoint}.json`);
+    if (!res.ok) throw new Error(`Failed to fetch ${endpoint}`);
+    const ids = await res.json();
+    const topIds = ids.slice(0, STORY_COUNT);
+
+    // Fetch all items in parallel
+    const items = await Promise.all(topIds.map(fetchItem));
+
+    // Filter out null/deleted items
+    const validItems = items.filter(item => item && !item.deleted && !item.dead);
+    renderStories(container, validItems);
+  } catch (err) {
+    console.error(`Error loading ${endpoint}:`, err);
+    renderError(container, `Failed to load stories. ${err.message}`);
+  }
+}
+
+// Load both columns in parallel
+Promise.all([
+  fetchStories('topstories', document.getElementById('top-stories')),
+  fetchStories('newstories', document.getElementById('new-stories'))
+]);
+
+// Auto-refresh every 2 minutes
+setInterval(() => {
+  fetchStories('topstories', document.getElementById('top-stories'));
+  fetchStories('newstories', document.getElementById('new-stories'));
+}, 120000);
+</script>
+
+</body>
+</html>
